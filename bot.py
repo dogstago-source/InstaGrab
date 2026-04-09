@@ -79,7 +79,7 @@ def run_ytdlp(url, out_dir, info_only=False):
         "--max-sleep-interval", "3",
         "--retries", "3",
         "--retry-sleep", "2",
-        "--timeout", "300",
+        "--socket-timeout", "300",
         "--fragment-retries", "10",
     ]
     if USE_COOKIES and IG_COOKIES_FILE and Path(IG_COOKIES_FILE).exists():
@@ -93,7 +93,7 @@ def run_ytdlp(url, out_dir, info_only=False):
         cmd += ["--write-thumbnail", "-o", f"{out_dir}/%(playlist_index)s_%(id)s.%(ext)s"]
     cmd.append(url)
 
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     info = {}
     for f in Path(out_dir).glob("*.info.json"):
         try:
