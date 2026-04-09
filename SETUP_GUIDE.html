@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InstaGrab Bot — Setup Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d14;
+    --card: #16161f;
+    --border: #252535;
+    --accent: #5b6af0;
+    --green: #22c55e;
+    --orange: #f97316;
+    --red: #ef4444;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --code-bg: #0a0a10;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  .wrap { max-width:760px; margin:0 auto; padding:40px 20px 80px; }
+
+  h1 { font-family:'Syne',sans-serif; font-size:42px; font-weight:800; margin-bottom:8px;
+       background:linear-gradient(90deg,#5b6af0,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .subtitle { color:var(--muted); font-size:15px; margin-bottom:40px; }
+
+  h2 { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; margin:36px 0 16px;
+       display:flex; align-items:center; gap:10px; }
+  .step-badge { background:linear-gradient(135deg,#5b6af0,#a78bfa); color:white;
+                border-radius:50%; width:28px; height:28px; display:flex; align-items:center;
+                justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:22px; margin-bottom:12px; }
+
+  .note { border-radius:12px; padding:14px 18px; font-size:13px; margin-bottom:16px; display:flex; gap:10px; align-items:flex-start; }
+  .note-info { background:rgba(91,106,240,0.1); border:1px solid rgba(91,106,240,0.25); }
+  .note-warn { background:rgba(249,115,22,0.08); border:1px solid rgba(249,115,22,0.25); color:#fdba74; }
+  .note-ok { background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.25); color:#86efac; }
+  .note-icon { font-size:18px; flex-shrink:0; }
+
+  pre { background:var(--code-bg); border:1px solid var(--border); border-radius:10px;
+        padding:16px 18px; overflow-x:auto; font-family:'JetBrains Mono',monospace;
+        font-size:13px; line-height:1.7; margin:10px 0; position:relative; }
+  code { font-family:'JetBrains Mono',monospace; background:rgba(91,106,240,0.15);
+         color:#a78bfa; border-radius:4px; padding:1px 6px; font-size:13px; }
+  .copy-btn { position:absolute; top:10px; right:10px; background:rgba(91,106,240,0.2);
+              border:1px solid rgba(91,106,240,0.3); color:#a78bfa; border-radius:6px;
+              padding:4px 10px; font-size:11px; cursor:pointer; font-family:'Syne',sans-serif;
+              font-weight:600; transition:all 0.2s; }
+  .copy-btn:hover { background:rgba(91,106,240,0.35); }
+  .copy-btn.copied { color:var(--green); border-color:var(--green); background:rgba(34,197,94,0.1); }
+
+  .env-table { width:100%; border-collapse:collapse; }
+  .env-table th { text-align:left; font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
+                   color:var(--muted); text-transform:uppercase; letter-spacing:1px; padding:8px 12px;
+                   border-bottom:1px solid var(--border); }
+  .env-table td { padding:10px 12px; font-size:14px; border-bottom:1px solid rgba(37,37,53,0.5); vertical-align:top; }
+  .env-table tr:last-child td { border-bottom:none; }
+  .required { background:rgba(239,68,68,0.1); color:#fca5a5; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:600; }
+  .optional { background:rgba(34,197,94,0.1); color:#86efac; border-radius:4px; padding:2px 8px; font-size:11px; font-weight:600; }
+
+  .feat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .feat-item { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .feat-item .feat-icon { font-size:22px; margin-bottom:6px; }
+  .feat-item strong { font-family:'Syne',sans-serif; font-size:14px; display:block; margin-bottom:4px; }
+  .feat-item span { font-size:12px; color:var(--muted); }
+
+  .cmd-list { list-style:none; }
+  .cmd-list li { display:flex; gap:14px; padding:10px 0; border-bottom:1px solid var(--border); align-items:center; }
+  .cmd-list li:last-child { border-bottom:none; }
+  .cmd { font-family:'JetBrains Mono',monospace; color:#a78bfa; font-size:14px; min-width:130px; }
+  .cmd-desc { font-size:13px; color:var(--muted); }
+
+  @media(max-width:550px) { h1{font-size:30px;} .feat-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>InstaGrab Bot</h1>
+  <p class="subtitle">Telegram Bot — Complete Setup Guide | Railway Deployment</p>
+
+  <!-- Features -->
+  <h2>🚀 Bot Features</h2>
+  <div class="feat-grid">
+    <div class="feat-item"><div class="feat-icon">📷</div><strong>Photos & Carousel</strong><span>Original quality, sab slides ek saath</span></div>
+    <div class="feat-item"><div class="feat-icon">🎬</div><strong>Reels & Videos</strong><span>HD video, streaming support</span></div>
+    <div class="feat-item"><div class="feat-icon">📝</div><strong>Caption & Hashtags</strong><span>Full text, hashtags alag se copy karo</span></div>
+    <div class="feat-item"><div class="feat-icon">👤</div><strong>Profile Info</strong><span>Bio, followers, posts, profile pic</span></div>
+  </div>
+
+  <!-- STEP 1: BotFather -->
+  <h2><div class="step-badge">1</div> Telegram Bot Banao (BotFather)</h2>
+  <div class="card">
+    <p style="margin-bottom:12px; font-size:14px;">Telegram par <strong>@BotFather</strong> search karo aur yeh steps follow karo:</p>
+    <pre>/start
+/newbot
+<span style="color:#86efac">Name:</span> InstaGrab Bot
+<span style="color:#86efac">Username:</span> instagrab_mybot (unique hona chahiye)
+<span style="color:#fcd34d"># BotFather aapko ek TOKEN dega — save kar lo!</span>
+# Example: 7123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxx</pre>
+    <div class="note note-warn"><span class="note-icon">⚠️</span> Token kisi ke saath share mat karo — yeh aapka bot ka password hai!</div>
+  </div>
+
+  <!-- STEP 2: GitHub -->
+  <h2><div class="step-badge">2</div> Code GitHub par Upload Karo</h2>
+  <div class="card">
+    <p style="font-size:14px; margin-bottom:12px;">Teen files GitHub par push karni hain:</p>
+    <div class="note note-info"><span class="note-icon">ℹ️</span> <strong>bot.py</strong>, <strong>requirements.txt</strong>, aur <strong>railway.toml</strong> — ye teeno files download karo (upar buttons se) aur GitHub repo mein upload karo.</div>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>git init
+git add .
+git commit -m "InstaGrab Bot initial commit"
+git remote add origin https://github.com/YOURUSERNAME/instabot.git
+git push -u origin main</pre>
+    <p style="font-size:13px; color:var(--muted); margin-top:10px;">Ya GitHub.com par directly new repo banao aur files drag-drop karo.</p>
+  </div>
+
+  <!-- STEP 3: Railway -->
+  <h2><div class="step-badge">3</div> Railway par Deploy Karo</h2>
+  <div class="card">
+    <p style="font-size:14px; margin-bottom:14px;">Railway.app bilkul free hai — credit card bhi nahi chahiye starter plan ke liye.</p>
+    <ol style="font-size:14px; padding-left:20px; line-height:2.2;">
+      <li><a href="https://railway.app" style="color:#a78bfa;">railway.app</a> par jao → <strong>GitHub se Login</strong> karo</li>
+      <li><strong>New Project</strong> → <strong>Deploy from GitHub Repo</strong></li>
+      <li>Apna <code>instabot</code> repo select karo</li>
+      <li>Project create hone ke baad <strong>Variables</strong> tab mein jao</li>
+      <li>Neeche diye environment variables add karo</li>
+      <li><strong>Deploy</strong> button dabao — 2 minute mein live!</li>
+    </ol>
+  </div>
+
+  <!-- STEP 4: Env Vars -->
+  <h2><div class="step-badge">4</div> Environment Variables Set Karo</h2>
+  <div class="card">
+    <table class="env-table">
+      <tr>
+        <th>Variable</th>
+        <th>Value</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td><code>BOT_TOKEN</code></td>
+        <td style="font-size:13px;">BotFather se mila token<br><span style="color:var(--muted); font-size:12px;">7123456789:AAHxxxxx...</span></td>
+        <td><span class="required">REQUIRED</span></td>
+      </tr>
+      <tr>
+        <td><code>IG_USERNAME</code></td>
+        <td style="font-size:13px;">Aapka Instagram username<br><span style="color:var(--muted); font-size:12px;">Private posts ke liye</span></td>
+        <td><span class="optional">OPTIONAL</span></td>
+      </tr>
+      <tr>
+        <td><code>IG_PASSWORD</code></td>
+        <td style="font-size:13px;">Aapka Instagram password<br><span style="color:var(--muted); font-size:12px;">IG_USERNAME ke saath</span></td>
+        <td><span class="optional">OPTIONAL</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Commands -->
+  <h2>📟 Bot Commands</h2>
+  <div class="card">
+    <ul class="cmd-list">
+      <li><span class="cmd">/start</span><span class="cmd-desc">Bot shuru karo, welcome message</span></li>
+      <li><span class="cmd">/help</span><span class="cmd-desc">Help aur instructions dekho</span></li>
+      <li><span class="cmd">/about</span><span class="cmd-desc">Bot ke baare mein info</span></li>
+      <li><span class="cmd">instagram link</span><span class="cmd-desc">Post/Reel/Profile link paste karo — auto detect!</span></li>
+    </ul>
+  </div>
+
+  <!-- Test -->
+  <h2><div class="step-badge">5</div> Test Karo</h2>
+  <div class="card">
+    <p style="font-size:14px; margin-bottom:14px;">Deploy hone ke baad Telegram par jaake apna bot search karo aur test karo:</p>
+    <pre># Koi bhi public Instagram link bhejo:
+https://www.instagram.com/p/ABC123/
+https://www.instagram.com/reel/XYZ789/
+https://www.instagram.com/instagram/</pre>
+    <div class="note note-ok"><span class="note-icon">✅</span> Sab theek hai to bot photo/video + caption + hashtags bhej dega!</div>
+  </div>
+
+  <!-- Troubleshooting -->
+  <h2>🔧 Problems? Solutions</h2>
+  <div class="card">
+    <div style="font-size:14px;">
+      <p style="margin-bottom:10px;"><strong style="color:#fca5a5;">Bot respond nahi kar raha?</strong><br>
+      <span style="color:var(--muted);">Railway dashboard → Logs check karo. BOT_TOKEN sahi set hai?</span></p>
+      <p style="margin-bottom:10px;"><strong style="color:#fca5a5;">Download fail ho raha hai?</strong><br>
+      <span style="color:var(--muted);">Post private ho sakti hai. Public posts hi download hoti hain without login.</span></p>
+      <p style="margin-bottom:10px;"><strong style="color:#fca5a5;">Instagram block kar raha hai?</strong><br>
+      <span style="color:var(--muted);">IG_USERNAME aur IG_PASSWORD set karo. Ya thodi der baad try karo.</span></p>
+      <p><strong style="color:#fca5a5;">Video too large?</strong><br>
+      <span style="color:var(--muted);">50MB se badi videos Telegram mein nahi jaati (bot limit). Reels mostly okay hoti hain.</span></p>
+    </div>
+  </div>
+
+</div>
+<script>
+function copyCode(btn) {
+  const pre = btn.parentElement;
+  const text = pre.innerText.replace('Copy','').replace('Copied!','').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
