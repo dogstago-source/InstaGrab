@@ -26,6 +26,7 @@ from telegram.constants import ParseMode, ChatAction
 # ─── CONFIG ──────────────────────────────────────────────────────────────────
 BOT_TOKEN        = os.environ.get("BOT_TOKEN", "")
 IG_COOKIES_FILE  = os.environ.get("IG_COOKIES_FILE", "")
+USE_COOKIES      = os.environ.get("USE_COOKIES", "false").lower() == "true"
 MAX_FILE_SIZE_MB = 49
 
 EMOJI = {
@@ -71,14 +72,21 @@ def run_ytdlp(url, out_dir, info_only=False):
         "--no-playlist",
         "--write-info-json",
         "--merge-output-format", "mp4",
-        "-f", "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/best",
+        "-f", "best[height<=1080]/best[height<=720]/best",
         "--add-header", "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "--add-header", "Accept-Language:en-US,en;q=0.9",
         "--sleep-interval", "1",
         "--max-sleep-interval", "3",
+        "--retries", "3",
+        "--retry-sleep", "2",
+        "--timeout", "300",
+        "--fragment-retries", "10",
     ]
-    if IG_COOKIES_FILE and Path(IG_COOKIES_FILE).exists():
+    if USE_COOKIES and IG_COOKIES_FILE and Path(IG_COOKIES_FILE).exists():
         cmd += ["--cookies", IG_COOKIES_FILE]
+    elif USE_COOKIES and not IG_COOKIES_FILE:
+        # Don't raise error here, let yt-dlp handle it naturally
+        pass
     if info_only:
         cmd += ["--skip-download", "-o", f"{out_dir}/%(id)s.%(ext)s"]
     else:
@@ -186,6 +194,17 @@ async def handle_post(update, context, url):
                 and '.info.' not in f.name
                 and file_size_mb(f) <= MAX_FILE_SIZE_MB
             ])
+            
+            # If no media files found, try different approach
+            if not media_files:
+                # Look for any downloaded files and filter by common image/video extensions
+                all_files = list(Path(tmpdir).iterdir())
+                media_files = sorted([
+                    f for f in all_files
+                    if f.suffix.lower() in ('.jpg','.jpeg','.png','.mp4','.webp')
+                    and '.info.' not in f.name
+                    and not f.name.endswith('.json')
+                ])
 
             await msg.delete()
 
@@ -314,9 +333,9 @@ async def error_handler(update, context):
 
 def main():
     if not BOT_TOKEN:
-        print("❌ BOT_TOKEN set nahi hai!")
+        print("ERROR: BOT_TOKEN not set!")
         return
-    print("🚀 InstaGrab Bot v2.0 (yt-dlp) starting...")
+    print("INFO: InstaGrab Bot v2.0 (yt-dlp) starting...")
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("help",  cmd_help))
