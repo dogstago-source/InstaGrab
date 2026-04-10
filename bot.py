@@ -168,12 +168,13 @@ async def handle_post(update, context, url):
             clean_cap = clean_caption(description)
             date_str  = f"{ts[6:8]}/{ts[4:6]}/{ts[:4]}" if ts and len(ts)==8 else ""
 
-            cap_msg = f"*📸 @{uploader_id}*"
+            cap_msg = f"📸 @{uploader_id}"
             if date_str: cap_msg += f"  📅 {date_str}"
             cap_msg += f"\n❤️ {format_num(likes)}  💬 {format_num(comments)}"
             if views: cap_msg += f"  👁 {format_num(views)}"
             cap_msg += "\n\n"
             if clean_cap:
+                # Truncate and escaping handled by keeping it simple
                 cap_msg += f"📝 *Caption:*\n{clean_cap[:300]}{'…' if len(clean_cap)>300 else ''}\n\n"
             if hashtags:
                 cap_msg += f"#️⃣ *Hashtags ({len(hashtags)}):*\n" + " ".join(hashtags[:15])
@@ -209,9 +210,13 @@ async def handle_post(update, context, url):
             await msg.delete()
 
             if not media_files:
-                await update.message.reply_text(
-                    "❌ Media file nahi mili. Post private hai ya Instagram ne block kiya.\n\n" + cap_msg[:400],
-                    parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(kb))
+                # Using broad exception handling or simple text to avoid markdown parse errors
+                try:
+                    await update.message.reply_text(
+                        f"❌ Media file nahi mili. Post private hai ya Instagram ne block kiya.\n\n{cap_msg[:400]}",
+                        reply_markup=InlineKeyboardMarkup(kb))
+                except:
+                    await update.message.reply_text("❌ Media file nahi mili.")
                 return
 
             if len(media_files) == 1:
@@ -219,27 +224,23 @@ async def handle_post(update, context, url):
                 if f.suffix.lower() == '.mp4':
                     await update.effective_chat.send_action(ChatAction.UPLOAD_VIDEO)
                     await update.message.reply_video(video=open(f,'rb'), caption=cap_msg[:1024],
-                                                     parse_mode=ParseMode.MARKDOWN,
                                                      reply_markup=InlineKeyboardMarkup(kb),
                                                      supports_streaming=True)
                 else:
                     await update.effective_chat.send_action(ChatAction.UPLOAD_PHOTO)
                     await update.message.reply_photo(photo=open(f,'rb'), caption=cap_msg[:1024],
-                                                     parse_mode=ParseMode.MARKDOWN,
                                                      reply_markup=InlineKeyboardMarkup(kb))
             else:
                 await update.effective_chat.send_action(ChatAction.UPLOAD_PHOTO)
                 mg = []
                 for i, f in enumerate(media_files[:10]):
                     c = cap_msg[:1024] if i==0 else None
-                    p = ParseMode.MARKDOWN if i==0 else None
                     if f.suffix.lower() == '.mp4':
-                        mg.append(InputMediaVideo(media=open(f,'rb'), caption=c, parse_mode=p))
+                        mg.append(InputMediaVideo(media=open(f,'rb'), caption=c))
                     else:
-                        mg.append(InputMediaPhoto(media=open(f,'rb'), caption=c, parse_mode=p))
+                        mg.append(InputMediaPhoto(media=open(f,'rb'), caption=c))
                 await update.message.reply_media_group(media=mg)
-                await update.message.reply_text(f"🎠 *Carousel:* {len(media_files)} items!",
-                                                parse_mode=ParseMode.MARKDOWN,
+                await update.message.reply_text(f"🎠 Carousel: {len(media_files)} items!",
                                                 reply_markup=InlineKeyboardMarkup(kb))
 
     except subprocess.TimeoutExpired:
