@@ -75,25 +75,30 @@ def run_ytdlp(url, out_dir, info_only=False):
         "-f", "best[height<=1080]/best[height<=720]/best",
         "--add-header", "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "--add-header", "Accept-Language:en-US,en;q=0.9",
-        "--sleep-interval", "1",
-        "--max-sleep-interval", "3",
-        "--retries", "3",
-        "--retry-sleep", "2",
+        "--sleep-interval", "2",
+        "--max-sleep-interval", "5",
+        "--retries", "5",
+        "--retry-sleep", "5",
         "--socket-timeout", "300",
         "--fragment-retries", "10",
+        "--extract-audio", "--keep-video", # Sometimes helps with metadata
     ]
     if USE_COOKIES and IG_COOKIES_FILE and Path(IG_COOKIES_FILE).exists():
         cmd += ["--cookies", IG_COOKIES_FILE]
-    elif USE_COOKIES and not IG_COOKIES_FILE:
-        # Don't raise error here, let yt-dlp handle it naturally
-        pass
+    
     if info_only:
-        cmd += ["--skip-download", "-o", f"{out_dir}/%(id)s.%(ext)s"]
+        cmd += ["--skip-download", "-j"]
     else:
-        cmd += ["--write-thumbnail", "-o", f"{out_dir}/%(playlist_index)s_%(id)s.%(ext)s"]
+        # Better output template for carousels
+        cmd += ["-o", f"{out_dir}/%(playlist_index)s_%(id)s.%(ext)s"]
+    
     cmd.append(url)
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    
+    # Debug: logs for internal check (optional)
+    if result.returncode != 0:
+        print(f"DEBUG: yt-dlp stderr: {result.stderr}")
     info = {}
     for f in Path(out_dir).glob("*.info.json"):
         try:
